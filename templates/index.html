@@ -2,7 +2,8 @@
 <html lang="en" class="scroll-smooth select-none">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
     <title>Saspo World | Immersive Tech Studio</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo.png') }}">
 	
@@ -10,11 +11,15 @@
     <meta name="keywords" content="{{ seo.keywords }}">
     <meta name="author" content="Saspo World Technologies Pvt. Ltd.">
     
+    <link rel="canonical" href="https://saspotech.com/">
+
+    <link rel="manifest" href="{{ url_for('manifest') }}">
     <meta name="theme-color" content="#050505">
+
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
-    <link rel="canonical" href="https://saspotech.com/">
+    <meta name="apple-mobile-web-app-title" content="Saspo World">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/logo.png') }}">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -103,7 +108,7 @@
     <div id="grid-overlay"></div>
     <div id="vignette"></div>
 
-    <nav class="fixed top-0 w-full z-50 px-6 py-4 border-b border-white/5 bg-black/80 backdrop-blur-md">
+    <nav class="fixed top-0 w-full z-50 px-6 py-4 pt-[calc(1rem+env(safe-area-inset-top))] border-b border-white/5 bg-black/80 backdrop-blur-md">
         <div class="container mx-auto flex justify-between items-center">
             <a href="#" onclick="route('home')" class="flex items-center gap-3 transition hover:opacity-80 group">
                 <img src="{{ url_for('static', filename='img/logo.png') }}" onerror="this.src='https://placehold.co/100x40/000000/FFFFFF?text=SASPO'" alt="Logo" class="h-8 md:h-10 w-auto object-contain">
@@ -581,6 +586,15 @@
             });
         }
         window.addEventListener('load', initVideoEmbeds);
+
+        // --- NEW: SERVICE WORKER REGISTRATION (REQUIRED FOR PWA) ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('SW registered'))
+                    .catch(err => console.log('SW failed', err));
+            });
+        }
     </script>
 </body>
 </html>
