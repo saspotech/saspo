@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth select-none">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Saspo World | Immersive Tech Studio</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/logo.png') }}">
+	
+    <meta name="description" content="{{ seo.description }}">
+    <meta name="keywords" content="{{ seo.keywords }}">
+    <meta name="author" content="Saspo World Technologies Pvt. Ltd.">
+    
+    <meta name="theme-color" content="#050505">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <link rel="canonical" href="https://saspotech.com/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.2/vanilla-tilt.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        display: ['Syncopate', 'sans-serif'],
+                        body: ['Space Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        studio: { bg: '#050505', accent: '#00f2ea', purple: '#7d00f2', glass: 'rgba(20, 20, 20, 0.6)' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #050505; color: #e5e5e5; overflow-x: hidden; cursor: none; -webkit-tap-highlight-color: transparent; }
+        img, video { -webkit-user-drag: none; user-select: none; pointer-events: auto; }
+
+        /* LOADING SCREEN */
+        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #000000; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 1.5s ease-out, visibility 1.5s; }
+        .loader-text { font-family: 'Syncopate', sans-serif; font-size: 0.7rem; letter-spacing: 0.3em; color: #ffffff; opacity: 0.7; animation: pulse 2s infinite; margin-top: 20px; }
+        @keyframes pulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 0.3; } }
+        body.loaded #loader { opacity: 0; visibility: hidden; pointer-events: none; }
+
+        /* CURSOR - DESKTOP ONLY */
+        .cursor-dot { width: 8px; height: 8px; background-color: #00f2ea; position: fixed; transform: translate(-50%, -50%); border-radius: 50%; z-index: 9999; pointer-events: none; }
+        .cursor-outline { width: 40px; height: 40px; border: 1px solid rgba(0, 242, 234, 0.5); position: fixed; transform: translate(-50%, -50%); border-radius: 50%; z-index: 9999; pointer-events: none; transition: width 0.2s, height 0.2s, background-color 0.2s; }
+
+        /* MOBILE OPTIMIZATIONS */
+        @media (pointer: coarse) {
+            body { cursor: auto !important; }
+            .cursor-dot, .cursor-outline { display: none !important; }
+            .js-tilt { transform: none !important; will-change: auto !important; }
+        }
+
+        #video-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -5; opacity: 0.4; filter: grayscale(30%) contrast(1.2); background: #050505; }
+        #vignette { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, transparent 40%, #050505 100%); z-index: -4; pointer-events: none; }
+        #grid-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px); background-size: 60px 60px; z-index: -4; pointer-events: none; opacity: 0.5; }
+        
+        .glass-card { background: rgba(10, 10, 10, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; }
+        .glass-card:hover { border-color: rgba(0, 242, 234, 0.4); box-shadow: 0 0 20px rgba(0, 242, 234, 0.1); }
+        
+        .nav-link { position: relative; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.75rem; font-weight: 500; color: #a3a3a3; transition: color 0.3s; }
+        .nav-link:hover, .nav-link.active { color: #ffffff; }
+        .nav-link::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: #00f2ea; transition: width 0.3s ease; }
+        .nav-link:hover::after, .nav-link.active::after { width: 100%; }
+        
+        .modal-overlay { transition: opacity 0.3s ease, visibility 0.3s; opacity: 0; visibility: hidden; pointer-events: none; z-index: 100; }
+        .modal-overlay.open { opacity: 1; visibility: visible; pointer-events: auto; }
+        .modal-content { transform: scale(0.95) translateY(20px); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .modal-overlay.open .modal-content { transform: scale(1) translateY(0); }
+        .btn-coming-soon { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #666; cursor: not-allowed; }
+        
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #0a0a0a; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        .view-section { opacity: 0; display: none; transition: opacity 0.5s ease; }
+        .view-section.active { opacity: 1; display: block; animation: fadeIn 0.8s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div id="loader">
+        <div class="w-64 md:w-96 overflow-hidden mix-blend-screen flex justify-center items-center">
+            <img src="{{ url_for('static', filename='img/black-hole-singularity.gif') }}" onerror="this.style.display='none'" alt="Loading" class="w-full h-auto object-contain">
+        </div>
+        <div class="loader-text">INITIALIZING SYSTEM...</div>
+    </div>
+
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+    
+    <video autoplay muted loop playsinline id="video-bg" poster="{{ url_for('static', filename='img/logo.png') }}">
+        <source src="{{ url_for('static', filename='video/spaceship.mp4') }}" type="video/mp4">
+    </video>
+    <div id="grid-overlay"></div>
+    <div id="vignette"></div>
+
+    <nav class="fixed top-0 w-full z-50 px-6 py-4 border-b border-white/5 bg-black/80 backdrop-blur-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="#" onclick="route('home')" class="flex items-center gap-3 transition hover:opacity-80 group">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" onerror="this.src='https://placehold.co/100x40/000000/FFFFFF?text=SASPO'" alt="Logo" class="h-8 md:h-10 w-auto object-contain">
+                <span class="font-display font-bold text-lg md:text-xl tracking-widest text-white group-hover:text-studio-accent transition">SASPO WORLD TECHNOLOGIES</span>
+            </a>
+            
+            <div class="hidden md:flex gap-10 items-center">
+                <button onclick="route('home')" class="nav-link">Home</button>
+                <button onclick="route('about')" class="nav-link">About</button>
+                <button onclick="route('courses')" class="nav-link">Courses</button>
+                <button onclick="route('games')" class="nav-link">Projects</button>
+                <button onclick="route('ai')" class="nav-link">AI Lab</button>
+                <button onclick="route('contact')" class="px-4 py-2 text-xs font-bold uppercase tracking-widest border border-white/20 rounded hover:bg-white hover:text-black transition">Contact</button>
+            </div>
+            
+            <button class="md:hidden text-2xl text-white p-2" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">☰</button>
+        </div>
+        
+        <div id="mobile-menu" class="hidden absolute top-full left-0 w-full bg-black/95 border-b border-white/10 p-6 flex flex-col gap-6 text-center shadow-2xl transition-all duration-300">
+             <button onclick="route('home')" class="py-3 text-sm uppercase tracking-widest border-b border-white/5">Home</button>
+             <button onclick="route('about')" class="py-3 text-sm uppercase tracking-widest border-b border-white/5">About</button>
+             <button onclick="route('courses')" class="py-3 text-sm uppercase tracking-widest border-b border-white/5">Courses</button>
+             <button onclick="route('games')" class="py-3 text-sm uppercase tracking-widest border-b border-white/5">Projects</button>
+             <button onclick="route('contact')" class="py-3 text-sm uppercase tracking-widest font-bold text-studio-accent">Contact</button>
+        </div>
+    </nav>
+
+    <main class="relative z-10 pt-20 min-h-screen">
+
+        <section id="home" class="view-section active">
+            <div class="min-h-[85vh] flex items-center justify-center p-6">
+                <div class="glass-card p-8 md:p-12 rounded-3xl max-w-5xl w-full relative overflow-hidden border border-white/10 shadow-2xl">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-studio-accent to-studio-purple"></div>
+                    <p class="font-body text-studio-accent tracking-[0.3em] md:tracking-[0.5em] text-[10px] md:text-xs font-bold mb-6 animate-pulse">IMMERSIVE TECHNOLOGY</p>
+                    <h1 class="font-display text-3xl md:text-7xl font-bold leading-tight mb-8 text-white drop-shadow-2xl">GAME DEV <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-studio-accent to-studio-purple">VFX / AI</span></h1>
+                    <p class="font-body text-gray-300 text-sm md:text-xl max-w-2xl mb-10 leading-relaxed">We blend Augmented Reality, Virtual Reality, and Generative AI to redefine the boundaries of education and entertainment.</p>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <button onclick="scrollToSection('home-projects')" class="px-8 py-4 bg-white text-black font-display font-bold text-xs md:text-sm tracking-widest hover:bg-studio-accent transition rounded-sm">OUR WORK</button>
+                        <button onclick="route('courses')" class="px-8 py-4 border border-white/30 text-white font-display font-bold text-xs md:text-sm tracking-widest hover:bg-white/10 transition rounded-sm">ACADEMY</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container mx-auto px-6 py-20 border-t border-white/5">
+                <div class="grid md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h2 class="font-display text-2xl md:text-3xl mb-6">Who We Are</h2>
+                        <p class="font-body text-gray-400 text-sm leading-relaxed mb-6">Saspo World Technologies is an innovative edtech company based in Kochi, India. We create engaging digital solutions that enhance concept clarity and promote skill development.</p>
+                        <button onclick="route('about')" class="text-studio-accent text-xs font-bold uppercase tracking-widest hover:text-white transition flex items-center gap-2">Read Full Profile <span>→</span></button>
+                    </div>
+                    <div class="glass-card p-6 rounded-xl border-l-2 border-studio-purple mt-6 md:mt-0"><h3 class="font-display text-lg mb-2">Our Mission</h3><p class="text-xs text-gray-400">To empower learners and educators through immersive digital experiences that enhance understanding, engagement, and skill development.</p></div>
+                </div>
+            </div>
+
+            <div class="bg-black/30 py-20 backdrop-blur-sm border-y border-white/5">
+                <div class="container mx-auto px-6">
+                    <div class="flex justify-between items-end mb-12"><h2 class="font-display text-2xl md:text-3xl">Proprietary <span class="text-studio-accent">AI Tools</span></h2></div>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        {% for tool in ai_tools %}
+                        <div class="glass-card p-8 rounded-xl hover:border-studio-accent transition group relative overflow-hidden">
+                            <div class="absolute top-0 right-0 p-4 text-4xl opacity-20 group-hover:opacity-100 transition">{{ tool.icon }}</div>
+                            <h3 class="font-display text-xl mb-3">{{ tool.title }}</h3>
+                            <p class="font-body text-gray-400 text-sm mb-6 max-w-md">{{ tool.desc }}</p>
+                            <a href="{{ tool.link }}" target="_blank" class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest bg-white/10 hover:bg-studio-accent hover:text-black px-4 py-2 rounded transition">Launch Tool <span>↗</span></a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            {% if links %}
+            <div class="container mx-auto px-6 py-24 border-t border-white/5">
+                <div class="text-center mb-16"><h2 class="font-display text-2xl md:text-4xl">Youtube <span class="text-studio-accent">Videos</span></h2></div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {% for link in links %}
+                    <div class="glass-card rounded-xl overflow-hidden group border border-white/10 hover:border-studio-accent transition duration-500">
+                        <div class="aspect-video bg-black relative youtube-container" data-url="{{ link.url }}">
+                            <div class="absolute inset-0 flex items-center justify-center pointer-events-none"><span class="text-xs text-gray-500 font-mono tracking-widest animate-pulse">LOADING STREAM...</span></div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="font-display text-sm font-bold mb-2 leading-tight truncate text-white">{{ link.title }}</h3>
+                            <a href="{{ link.url }}" target="_blank" class="text-[10px] text-gray-400 hover:text-studio-accent uppercase tracking-widest flex items-center gap-2 transition">Watch on YouTube <span>↗</span></a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div id="home-projects" class="container mx-auto px-6 py-24 border-t border-white/5">
+                <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
+                    <h2 class="font-display text-2xl md:text-3xl">Featured <span class="text-studio-purple">Games</span></h2>
+                    <button onclick="route('games')" class="text-xs font-bold uppercase tracking-widest border border-white/20 px-4 py-2 hover:bg-white hover:text-black transition w-full md:w-auto">View All Projects</button>
+                </div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    {% for key, game in games.items() %}
+                        {% if key != 'drone-3d' and loop.index <= 3 %}
+                        <div onclick='openGameDetails({{ game | tojson | safe }})' class="glass-card rounded-xl group cursor-pointer overflow-hidden relative border border-white/10 hover:border-studio-accent transition duration-500 js-tilt">
+                            <div class="aspect-[4/3] bg-gray-900 relative">
+                                <img src="{{ url_for('static', filename='img/' + game.img) }}" onerror="this.src='https://placehold.co/600x800/1a1a1a/FFF?text={{ game.title | replace(' ', '+') }}'" loading="lazy" alt="{{ game.title }}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition duration-700">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-90"></div>
+                                <div class="absolute bottom-0 left-0 p-6 w-full">
+                                    <span class="text-[10px] font-bold bg-studio-accent text-black px-2 py-1 rounded-sm uppercase tracking-wider mb-2 inline-block">{{ game.genre }}</span>
+                                    <div class="flex justify-between items-end"><h3 class="font-display text-xl text-white">{{ game.title }}</h3><div class="w-8 h-8 rounded-full border border-white/30 flex items-center justify-center text-xs group-hover:bg-white group-hover:text-black transition">↗</div></div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% if 'drone-3d' in games %}
+                {% set drone = games['drone-3d'] %}
+                <div class="mt-8">
+                    <div onclick='openGameDetails({{ drone | tojson | safe }})' class="glass-card rounded-xl group cursor-pointer overflow-hidden relative border border-white/10 hover:border-studio-purple transition duration-500 js-tilt">
+                        <div class="aspect-[21/9] md:aspect-[3/1] bg-gray-900 relative">
+                            <img src="{{ url_for('static', filename='img/' + drone.img) }}" onerror="this.src='https://placehold.co/1200x400/1a1a1a/FFF?text={{ drone.title | replace(' ', '+') }}'" loading="lazy" alt="{{ drone.title }}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition duration-700">
+                            <div class="absolute inset-0 bg-gradient-to-r from-black via-transparent to-black/50 opacity-90"></div>
+                            <div class="absolute bottom-0 left-0 p-8 w-full md:w-1/2">
+                                <span class="text-[10px] font-bold bg-studio-purple text-white px-2 py-1 rounded-sm uppercase tracking-wider mb-2 inline-block">FEATURED • {{ drone.genre }}</span>
+                                <h3 class="font-display text-2xl md:text-4xl text-white mb-2">{{ drone.title }}</h3>
+                                <p class="font-body text-sm text-gray-300">{{ drone.description }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="py-24 border-t border-white/5 overflow-hidden relative">
+                <div class="container mx-auto px-6 mb-12">
+                    <h2 class="font-display text-2xl md:text-3xl mb-2">Virtual <span class="text-studio-accent">Talent</span></h2>
+                    <p class="text-gray-400 text-sm">Meet our network of AI-generated creators.</p>
+                </div>
+                <div id="influencer-scroller" class="flex flex-col gap-8 w-full overflow-x-hidden">
+                    <div class="scroll-row-left flex gap-6 w-max pl-6">
+                        {% for i in range(2) %}
+                            {% for influencer in ai_influencers %}
+                            <div class="glass-card p-4 rounded-xl w-48 md:w-64 flex-shrink-0 hover:bg-white/5 transition group">
+                                <div class="aspect-square bg-black rounded-lg mb-4 overflow-hidden">
+                                    <img src="{{ url_for('static', filename='img/' + influencer.img) }}" onerror="this.src='https://placehold.co/400x400/1a1a1a/FFF?text={{ influencer.name | replace(' ', '+') }}'" loading="lazy" alt="{{ influencer.name }}" class="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition grayscale group-hover:grayscale-0">
+                                </div>
+                                <h3 class="font-display text-xs md:text-sm">{{ influencer.name }}</h3><p class="text-[10px] text-studio-accent uppercase">{{ influencer.niche }}</p>
+                            </div>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                    <div class="scroll-row-right flex gap-6 w-max pl-6">
+                        {% for i in range(2) %}
+                            {% for influencer in ai_influencers|reverse %}
+                            <div class="glass-card p-4 rounded-xl w-48 md:w-64 flex-shrink-0 hover:bg-white/5 transition group">
+                                <div class="aspect-square bg-black rounded-lg mb-4 overflow-hidden">
+                                    <img src="{{ url_for('static', filename='img/' + influencer.img) }}" onerror="this.src='https://placehold.co/400x400/1a1a1a/FFF?text={{ influencer.name | replace(' ', '+') }}'" loading="lazy" alt="{{ influencer.name }}" class="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition grayscale group-hover:grayscale-0">
+                                </div>
+                                <h3 class="font-display text-xs md:text-sm">{{ influencer.name }}</h3><p class="text-[10px] text-studio-purple uppercase">{{ influencer.niche }}</p>
+                            </div>
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="container mx-auto px-6 py-24 border-t border-white/5">
+                <div class="glass-card p-8 rounded-3xl overflow-hidden relative">
+                    <div class="grid md:grid-cols-2 gap-12">
+                        <div class="flex flex-col justify-center">
+                            <h2 class="font-display text-2xl md:text-3xl mb-6">Visit <span class="text-studio-purple">HQ</span></h2>
+                            <p class="font-body text-gray-400 text-sm mb-8 leading-relaxed">Located in the heart of Kerala's IT hub.</p>
+                            <div class="space-y-6 font-body text-sm text-gray-300">
+                                <div class="flex items-start gap-4"><span class="text-xl">📍</span><div><p class="font-bold text-white uppercase tracking-wider text-xs mb-1">Address</p><p>{{ contact.address }}</p></div></div>
+                                <div class="flex items-start gap-4"><span class="text-xl">📧</span><div><p class="font-bold text-white uppercase tracking-wider text-xs mb-1">Email</p><a href="mailto:{{ contact.email }}" class="hover:text-studio-accent transition break-all">{{ contact.email }}</a></div></div>
+                                <div class="flex items-start gap-4"><span class="text-xl">📞</span><div><p class="font-bold text-white uppercase tracking-wider text-xs mb-1">Phone</p><a href="{{ contact.whatsapp_url }}" target="_blank" class="hover:text-studio-accent transition">{{ contact.phone }}</a></div></div>
+                            </div>
+                            <div class="mt-8 pt-8 border-t border-white/10"><a href="{{ contact.whatsapp_url }}" target="_blank" class="inline-block w-full md:w-auto text-center px-6 py-3 bg-white text-black font-display font-bold text-xs tracking-widest hover:bg-studio-accent transition">CHAT ON WHATSAPP</a></div>
+                        </div>
+                        <div class="h-64 md:h-full min-h-[300px] rounded-xl overflow-hidden bg-gray-900 border border-white/10 relative group">
+                            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3928.567794770263!2d76.35343531479464!3d10.052442992815192!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b080c058769c25d%3A0x69dfd42d326e2e21!2sKerala%20Technology%20Innovation%20Zone%20(KTIZ)!5e0!3m2!1sen!2sin!4v1625634567890!5m2!1sen!2sin" width="100%" height="100%" style="border:0; filter: grayscale(100%) invert(90%);" allowfullscreen="" loading="lazy" class="group-hover:filter-none transition duration-700"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="games" class="view-section hidden p-6">
+            <div class="container mx-auto">
+                <div class="text-center mb-16"><h2 class="font-display text-3xl md:text-4xl">Game <span class="text-studio-purple">Projects</span></h2></div>
+                <div class="grid md:grid-cols-3 gap-8">
+                    {% for key, game in games.items() %}
+                        {% if key != 'drone-3d' %}
+                        <div onclick='openGameDetails({{ game | tojson | safe }})' class="glass-card rounded-xl group cursor-pointer overflow-hidden relative border border-white/10 hover:border-studio-accent transition duration-500 js-tilt">
+                            <div class="aspect-[4/3] bg-gray-900 relative">
+                                <img src="{{ url_for('static', filename='img/' + game.img) }}" onerror="this.src='https://placehold.co/600x800/1a1a1a/FFF?text={{ game.title | replace(' ', '+') }}'" loading="lazy" alt="{{ game.title }}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition duration-700">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-90"></div>
+                                <div class="absolute bottom-0 left-0 p-6 w-full">
+                                    <span class="text-[10px] font-bold bg-studio-accent text-black px-2 py-1 rounded-sm uppercase tracking-wider mb-2 inline-block">{{ game.genre }}</span>
+                                    <div class="flex justify-between items-end"><h3 class="font-display text-xl text-white">{{ game.title }}</h3><div class="w-8 h-8 rounded-full border border-white/30 flex items-center justify-center text-xs group-hover:bg-white group-hover:text-black transition">↗</div></div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                {% if 'drone-3d' in games %}
+                {% set drone = games['drone-3d'] %}
+                <div class="mt-8">
+                    <div onclick='openGameDetails({{ drone | tojson | safe }})' class="glass-card rounded-xl group cursor-pointer overflow-hidden relative border border-white/10 hover:border-studio-purple transition duration-500 js-tilt">
+                        <div class="aspect-[21/9] md:aspect-[3/1] bg-gray-900 relative">
+                            <img src="{{ url_for('static', filename='img/' + drone.img) }}" onerror="this.src='https://placehold.co/1200x400/1a1a1a/FFF?text={{ drone.title | replace(' ', '+') }}'" loading="lazy" alt="{{ drone.title }}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition duration-700">
+                            <div class="absolute inset-0 bg-gradient-to-r from-black via-transparent to-black/50 opacity-90"></div>
+                            <div class="absolute bottom-0 left-0 p-8 w-full md:w-1/2">
+                                <span class="text-[10px] font-bold bg-studio-purple text-white px-2 py-1 rounded-sm uppercase tracking-wider mb-2 inline-block">FEATURED • {{ drone.genre }}</span>
+                                <h3 class="font-display text-2xl md:text-4xl text-white mb-2">{{ drone.title }}</h3>
+                                <p class="font-body text-sm text-gray-300">{{ drone.description }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <section id="courses" class="view-section hidden p-6">
+            <div class="container mx-auto"><div class="text-center mb-16"><h2 class="font-display text-3xl md:text-4xl">Academy <span class="text-studio-accent">.EDU</span></h2></div><div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">{% for course in courses %}<div class="glass-card p-8 rounded-xl group hover:bg-white/5 cursor-pointer js-tilt flex flex-col" onclick='openCourseDetails({{ course | tojson | safe }})'><div class="text-4xl mb-6 group-hover:scale-110 transition">{{ course.icon }}</div><h3 class="font-display text-lg mb-2 leading-tight">{{ course.title }}</h3><div class="mt-auto pt-4 border-t border-white/10 flex justify-between text-[10px] font-mono text-gray-400"><span>{{ course.duration }}</span><span>{{ course.level }}</span></div><button class="mt-4 w-full py-2 bg-white/5 hover:bg-studio-accent hover:text-black text-[10px] font-bold uppercase tracking-widest border border-white/10 transition rounded-sm">View Syllabus</button></div>{% endfor %}</div></div>
+        </section>
+
+        <section id="about" class="view-section hidden p-6">
+            <div class="container mx-auto max-w-5xl">
+                <div class="glass-card p-8 md:p-10 rounded-2xl">
+                    <h2 class="font-display text-3xl md:text-4xl mb-8">Company Profile</h2>
+                    <p class="font-body text-gray-300 text-sm leading-relaxed mb-8">Saspo World Technologies Pvt. Ltd. is an innovative edtech company based in Kochi, India.</p>
+                    <div class="grid md:grid-cols-1 gap-6 mb-8 border-l-2 border-white/10 pl-6"><div><h3 class="font-display text-sm text-studio-accent mb-2">Vision</h3><p class="text-xs text-gray-400">To redefine the future of learning by integrating technology.</p></div><div><h3 class="font-display text-sm text-studio-accent mb-2">Mission</h3><p class="text-xs text-gray-400">To empower learners and educators through immersive digital experiences.</p></div></div>
+                    <div class="border-t border-white/10 pt-8"><h3 class="font-display text-xs text-gray-500 mb-6 uppercase tracking-widest">Leadership</h3><div class="space-y-3">{% for member in team %}<div onclick='openTeamProfile({{ member | tojson | safe }})' class="group flex items-center gap-4 p-3 bg-black/20 rounded border border-white/5 hover:border-studio-accent cursor-pointer transition"><div class="w-10 h-10 rounded-full bg-gray-800 overflow-hidden flex-shrink-0"><img src="{{ url_for('static', filename='img/' + (member.img if member.img else 'default.jpg')) }}" onerror="this.onerror=null; this.src='https://api.dicebear.com/7.x/identicon/svg?seed={{ member.name | replace(' ', '') }}'" class="w-full h-full object-cover"></div><div class="min-w-0"><h4 class="font-bold text-sm text-white group-hover:text-studio-accent transition truncate">{{ member.name }}</h4><p class="text-[10px] text-gray-500 uppercase tracking-wider">{{ member.role }}</p></div><span class="ml-auto text-studio-accent opacity-0 group-hover:opacity-100 transition">→</span></div>{% endfor %}</div></div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="ai" class="view-section hidden p-6"><div class="container mx-auto"><div class="flex justify-between items-end border-b border-white/10 pb-6 mb-12"><h2 class="font-display text-3xl md:text-4xl">AI <span class="text-studio-accent">CREATORS</span></h2></div><div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">{% for influencer in ai_influencers %}<div class="group glass-card p-4 rounded-xl hover:bg-white/5 transition"><div class="aspect-[3/4] bg-black rounded-lg mb-4 overflow-hidden"><img src="{{ url_for('static', filename='img/' + influencer.img) }}" onerror="this.src='https://placehold.co/400x400/1a1a1a/FFF?text={{ influencer.name | replace(' ', '+') }}'" loading="lazy" alt="{{ influencer.name }}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition duration-500 grayscale group-hover:grayscale-0"></div><h3 class="font-display text-sm truncate">{{ influencer.name }}</h3><p class="text-[10px] text-studio-accent uppercase tracking-wider mb-2 truncate">{{ influencer.niche }}</p><p class="text-[10px] font-mono text-gray-500 truncate">{{ influencer.handle }}</p></div>{% endfor %}</div></div></section>
+        
+        <section id="contact" class="view-section hidden p-6 flex items-center justify-center h-full"><div class="glass-card p-12 rounded-3xl max-w-2xl w-full text-center"><h2 class="font-display text-2xl md:text-4xl mb-2">Start a <span class="text-studio-accent">Project</span></h2><p class="text-gray-400 text-sm mb-8">Ready to bring your idea into the 3D world?</p>
+            <form id="whatsapp-form" class="space-y-4 text-left" onsubmit="sendToWhatsapp(event)">
+                <input id="contact-name" type="text" placeholder="NAME" class="w-full bg-black/50 border border-white/10 p-4 text-sm focus:border-studio-accent outline-none transition text-white" required>
+                <textarea id="contact-msg" placeholder="MESSAGE" rows="4" class="w-full bg-black/50 border border-white/10 p-4 text-sm focus:border-studio-accent outline-none transition text-white" required></textarea>
+                <button type="submit" class="w-full bg-white text-black font-display font-bold py-4 hover:bg-studio-accent transition tracking-widest">CHAT ON WHATSAPP</button>
+            </form>
+            <div class="mt-8 pt-8 border-t border-white/10"><p class="text-xs text-gray-500 mb-4 font-mono">Existing Client?</p><a href="{{ contact.cli_url }}" target="_blank" class="inline-block px-6 py-3 border border-studio-accent text-studio-accent font-display text-xs font-bold tracking-widest hover:bg-studio-accent hover:text-black transition">OPEN CLI DASHBOARD</a></div><div class="mt-8 pt-8 border-t border-white/10 text-xs text-gray-500"><p>{{ contact.address }}</p><p class="mt-1">{{ contact.email }}</p></div></div>
+        </section>
+
+    </main>
+
+    <footer class="mt-auto py-8 border-t border-white/5 bg-black/90 backdrop-blur-sm relative z-20">
+        <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center text-xs text-gray-600 gap-4 md:gap-0">
+            <p>© 2026 Saspo World Technologies Pvt. Ltd.</p>
+            <div class="flex items-center gap-6">
+                <div class="flex gap-4 border-r border-white/10 pr-6 mr-2">
+                    <a href="{{ contact.linkedin if contact.linkedin else 'https://www.linkedin.com/company/saspoworld' }}" target="_blank" class="hover:text-[#0077b5] transition text-lg" title="LinkedIn">
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                    </a>
+                    <a href="{{ contact.instagram if contact.instagram else 'https://www.instagram.com/saspoworld' }}" target="_blank" class="hover:text-[#E1306C] transition text-lg" title="Instagram">
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                    </a>
+                </div>
+                <button onclick="openGeneralPolicy('privacy')" class="hover:text-white transition">Privacy</button>
+                <button onclick="openGeneralPolicy('terms')" class="hover:text-white transition">Terms</button>
+                <span class="cursor-default text-gray-500">Kochi, India</span>
+            </div>
+        </div>
+    </footer>
+
+    <div id="course-modal" class="modal-overlay fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
+        <div class="glass-card modal-content max-w-3xl w-full rounded-2xl p-8 relative max-h-[85vh] overflow-y-auto">
+            <button onclick="closeModal('course-modal')" class="absolute top-4 right-4 text-white hover:text-studio-accent text-3xl z-20">×</button>
+            <div class="text-center mb-8">
+                <div class="text-6xl mb-4" id="course-modal-icon"></div>
+                <h2 id="course-modal-title" class="font-display text-2xl md:text-3xl font-bold mb-2"></h2>
+                <div class="flex justify-center gap-4 text-xs font-mono text-studio-accent">
+                    <span id="course-modal-level" class="border border-studio-accent px-2 py-1 rounded"></span>
+                    <span id="course-modal-duration" class="border border-white/30 text-white px-2 py-1 rounded"></span>
+                </div>
+            </div>
+            <div class="space-y-8">
+                <div><h4 class="font-display text-xs text-gray-500 mb-2 uppercase tracking-widest border-b border-white/10 pb-2">Overview</h4><p id="course-modal-desc" class="font-body text-gray-300 text-sm leading-relaxed"></p></div>
+                <div><h4 class="font-display text-xs text-gray-500 mb-2 uppercase tracking-widest border-b border-white/10 pb-2">Syllabus</h4><ul id="course-modal-modules" class="space-y-2 text-sm text-gray-300 list-disc pl-5"></ul></div>
+                <div><h4 class="font-display text-xs text-gray-500 mb-2 uppercase tracking-widest border-b border-white/10 pb-2">Tools Covered</h4><div id="course-modal-tools" class="flex flex-wrap gap-2"></div></div>
+            </div>
+            <button id="course-enroll-btn" class="w-full mt-8 bg-white text-black font-display font-bold py-4 hover:bg-studio-accent transition tracking-widest rounded-sm">ENROLL NOW</button>
+        </div>
+    </div>
+
+    <div id="game-modal" class="modal-overlay fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"><div class="glass-card modal-content max-w-5xl w-full rounded-2xl flex flex-col md:flex-row overflow-hidden h-[85vh] relative"><button onclick="closeModal('game-modal')" class="absolute top-4 right-4 text-white hover:text-studio-accent text-3xl z-20">×</button><div class="w-full md:w-5/12 h-48 md:h-auto bg-black relative"><img id="game-modal-img" src="" class="w-full h-full object-cover opacity-80"><div class="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div></div><div class="w-full md:w-7/12 p-8 overflow-y-auto"><h2 id="game-modal-title" class="font-display text-3xl font-bold mb-2"></h2><span id="game-modal-genre" class="text-xs font-bold text-studio-accent border border-studio-accent px-2 py-1 uppercase rounded-sm mb-6 inline-block"></span><h4 class="font-display text-xs text-gray-500 mb-2 uppercase tracking-widest mt-4">About</h4><p id="game-modal-desc" class="font-body text-gray-300 text-sm leading-relaxed mb-6"></p><h4 class="font-display text-xs text-gray-500 mb-2 uppercase tracking-widest">Features</h4><ul id="game-modal-features" class="grid grid-cols-2 gap-2 text-xs text-gray-400 font-body mb-8"></ul><div class="flex gap-4 mt-auto"><button id="btn-download" class="flex-1 font-display font-bold py-3 transition text-sm tracking-widest">DOWNLOAD</button><button id="btn-view-policy" class="flex-1 border border-white/20 text-white font-display font-bold py-3 hover:bg-white/10 transition text-sm tracking-widest">PRIVACY POLICY</button></div></div></div></div>
+
+    <div id="policy-modal" class="modal-overlay fixed inset-0 z-[200] flex items-center justify-center p-0 md:p-6 bg-black/95"><div class="bg-[#0a0a0a] modal-content w-full max-w-4xl h-full md:h-auto md:max-h-[90vh] rounded-xl border border-white/10 flex flex-col shadow-2xl"><div class="p-6 border-b border-white/10 flex justify-between items-center bg-black/50"><div><h2 class="font-display text-xl text-white">Privacy Policy</h2><p id="policy-game-title" class="text-studio-accent text-xs uppercase tracking-widest"></p></div><button onclick="closeModal('policy-modal')" class="text-xs font-bold uppercase tracking-widest border border-white/20 px-4 py-2 hover:bg-white hover:text-black transition">Close</button></div><div id="policy-content-area" class="flex-grow overflow-y-auto p-8 md:p-12 space-y-4"></div></div></div>
+    
+    <div id="team-modal" class="modal-overlay fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="glass-card modal-content max-w-2xl w-full rounded-2xl p-8 relative">
+            <button onclick="closeModal('team-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">×</button>
+            <div class="flex flex-col md:flex-row gap-6 items-start">
+                <img id="team-modal-img" src="" class="w-32 h-32 rounded-full border-2 border-studio-accent object-cover bg-gray-800">
+                <div class="flex-1">
+                    <h2 id="team-modal-name" class="font-display text-xl font-bold"></h2>
+                    <p id="team-modal-role" class="text-studio-accent text-xs uppercase tracking-wider font-bold mb-4"></p>
+                    <p id="team-modal-bio" class="text-sm text-gray-400 leading-relaxed mb-4"></p>
+                    <div id="team-modal-skills" class="flex flex-wrap gap-2"></div>
+                    <a id="team-modal-linkedin" href="#" target="_blank" class="mt-6 inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest border border-white/20 px-4 py-2 rounded hover:bg-[#0077b5] hover:border-[#0077b5] hover:text-white transition" style="display: none;"><span>LINKEDIN</span> ↗</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+        window.addEventListener('load', () => { setTimeout(() => { document.body.classList.add('loaded'); route('home'); }, 3000); });
+        VanillaTilt.init(document.querySelectorAll(".js-tilt"), { max: 5, speed: 400, glare: true, "max-glare": 0.1 });
+        document.addEventListener('contextmenu', e => e.preventDefault());
+
+        let mouseX=0, mouseY=0;
+        document.addEventListener('mousemove', (e) => {
+            const dot = document.querySelector('.cursor-dot');
+            const outline = document.querySelector('.cursor-outline');
+            dot.style.left = e.clientX+'px'; dot.style.top = e.clientY+'px';
+            setTimeout(()=>{ outline.style.left = e.clientX+'px'; outline.style.top = e.clientY+'px'; }, 50);
+        });
+
+        function initHomeParallax() {
+            ScrollTrigger.getAll().forEach(t => t.kill());
+            gsap.to(".scroll-row-left", { xPercent: -20, ease: "none", scrollTrigger: { trigger: "#influencer-scroller", start: "top bottom", end: "bottom top", scrub: 1 } });
+            gsap.to(".scroll-row-right", { xPercent: 10, ease: "none", scrollTrigger: { trigger: "#influencer-scroller", start: "top bottom", end: "bottom top", scrub: 1 } });
+        }
+
+        function route(id) {
+            document.getElementById('mobile-menu').classList.add('hidden');
+            document.querySelectorAll('.view-section').forEach(el => { el.classList.remove('active'); setTimeout(() => { if(!el.classList.contains('active')) el.style.display = 'none'; }, 500); });
+            const target = document.getElementById(id);
+            if(target) { target.style.display = (id === 'contact') ? 'flex' : 'block'; setTimeout(() => { target.classList.add('active'); if(id === 'home') initHomeParallax(); }, 10); window.scrollTo(0,0); }
+            document.querySelectorAll('.nav-link').forEach(el => { if(el.getAttribute('onclick').includes(id)) el.classList.add('active'); else el.classList.remove('active'); });
+        }
+
+        function scrollToSection(id) { const el = document.getElementById(id); if(el) el.scrollIntoView({ behavior: 'smooth' }); }
+
+        function openGameDetails(game) {
+            document.getElementById('game-modal-title').innerText = game.title;
+            document.getElementById('game-modal-genre').innerText = game.genre;
+            document.getElementById('game-modal-desc').innerText = game.description;
+            document.getElementById('game-modal-img').src = `{{ url_for('static', filename='img/') }}${game.img}`;
+            const featuresList = document.getElementById('game-modal-features');
+            featuresList.innerHTML = '';
+            if(game.features) { game.features.forEach(feature => { const li = document.createElement('li'); li.className = "flex items-center gap-2"; li.innerHTML = `<span class="text-studio-accent">✓</span> ${feature}`; featuresList.appendChild(li); }); }
+            
+            const btn = document.getElementById('btn-download');
+            btn.className = "flex-1 font-display font-bold py-3 transition text-sm tracking-widest";
+            if (game.link && game.link !== '#') {
+                btn.innerText = "DOWNLOAD";
+                btn.classList.add('bg-white', 'text-black', 'hover:bg-studio-accent', 'cursor-pointer');
+                btn.disabled = false;
+                btn.onclick = () => window.open(game.link, '_blank');
+            } else {
+                btn.innerText = "COMING SOON";
+                btn.classList.add('btn-coming-soon');
+                btn.disabled = true;
+                btn.onclick = null;
+            }
+
+            const policyBtn = document.getElementById('btn-view-policy');
+            policyBtn.onclick = function() { openPolicyModal(game.title, game.privacy_policy); };
+            document.getElementById('game-modal').classList.add('open');
+        }
+
+        function openCourseDetails(course) {
+            document.getElementById('course-modal-title').innerText = course.title;
+            document.getElementById('course-modal-icon').innerText = course.icon;
+            document.getElementById('course-modal-level').innerText = course.level;
+            document.getElementById('course-modal-duration').innerText = course.duration;
+            document.getElementById('course-modal-desc').innerText = course.description;
+            const modulesList = document.getElementById('course-modal-modules');
+            modulesList.innerHTML = '';
+            if(course.modules) course.modules.forEach(mod => { const li = document.createElement('li'); li.innerText = mod; modulesList.appendChild(li); });
+            const toolsContainer = document.getElementById('course-modal-tools');
+            toolsContainer.innerHTML = '';
+            if(course.tools) course.tools.forEach(tool => { const span = document.createElement('span'); span.className = 'px-2 py-1 bg-white/10 rounded text-[10px] text-gray-300 border border-white/5'; span.innerText = tool; toolsContainer.appendChild(span); });
+            
+            const enrollBtn = document.getElementById('course-enroll-btn');
+            const text = `I want to know more about the ${course.title} course`;
+            const url = `https://wa.me/917994045703?text=${encodeURIComponent(text)}`;
+            enrollBtn.onclick = () => window.open(url, '_blank');
+
+            document.getElementById('course-modal').classList.add('open');
+        }
+
+        const companyPolicies = {
+            privacy: {{ contact.privacy | tojson | safe }},
+            terms: {{ contact.terms | tojson | safe }}
+        };
+
+        function openGeneralPolicy(type) {
+            let title = type === 'privacy' ? 'Privacy Policy' : 'Terms of Service';
+            let content = companyPolicies[type] || '<p>Content not available.</p>';
+            openPolicyModal(title, content);
+        }
+
+        function openPolicyModal(title, content) {
+            const container = document.getElementById('policy-content-area');
+            document.getElementById('policy-game-title').innerText = title;
+
+            if (typeof content === 'object' && content !== null) {
+                let html = `<div class="space-y-6 text-gray-300 font-body leading-relaxed text-sm md:text-base">`;
+                if (content.updated) html += `<p class="text-xs uppercase tracking-widest text-gray-500 border-b border-gray-700 pb-2">Last Updated: ${content.updated}</p>`;
+                if (content.intro) html += `<p class="mt-4">${content.intro}</p>`;
+                if (content.sections && Array.isArray(content.sections)) {
+                    content.sections.forEach(section => {
+                        html += `<h3 class="text-lg text-white font-display mt-8 mb-2">${section.title}</h3>`;
+                        html += `<p>${section.content}</p>`;
+                    });
+                }
+                if (content.contact) {
+                    html += `<h3 class="text-lg text-white font-display mt-8 mb-2">Contact Us</h3>`;
+                    html += `<p><a href="mailto:${content.contact}" class="text-studio-accent underline hover:text-white">${content.contact}</a></p>`;
+                }
+                html += `</div>`;
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = content || "<p>Policy details not available.</p>";
+            }
+            document.getElementById('policy-modal').classList.add('open');
+        }
+
+        function openTeamProfile(member) {
+            document.getElementById('team-modal-name').innerText = member.name;
+            document.getElementById('team-modal-role').innerText = member.role;
+            document.getElementById('team-modal-bio').innerText = member.bio;
+            
+            const localImg = `{{ url_for('static', filename='img/') }}${member.img || 'default.jpg'}`;
+            let dicebearUrl = `https://api.dicebear.com/7.x/identicon/svg?seed=${member.name.replace(/ /g, '')}`;
+            
+            const imgEl = document.getElementById('team-modal-img');
+            imgEl.onerror = () => { imgEl.src = dicebearUrl; };
+            imgEl.src = localImg;
+
+            const skillsContainer = document.getElementById('team-modal-skills');
+            skillsContainer.innerHTML = '';
+            member.skills.forEach(skill => { const badge = document.createElement('span'); badge.className = 'px-2 py-1 bg-white/10 rounded text-[10px] font-bold uppercase text-gray-300'; badge.innerText = skill; skillsContainer.appendChild(badge); });
+            
+            const linkedInBtn = document.getElementById('team-modal-linkedin');
+            if (member.socials && member.socials.linkedin && member.socials.linkedin !== '#') {
+                linkedInBtn.href = member.socials.linkedin;
+                linkedInBtn.style.display = 'inline-flex';
+            } else {
+                linkedInBtn.style.display = 'none';
+            }
+            
+            document.getElementById('team-modal').classList.add('open');
+        }
+
+        function closeModal(modalId) { document.getElementById(modalId).classList.remove('open'); }
+
+        function sendToWhatsapp(event) {
+            event.preventDefault();
+            const name = document.getElementById('contact-name').value;
+            const message = document.getElementById('contact-msg').value;
+            const text = `*New Inquiry from Website*\n\n*Name:* ${name}\n*Message:* ${message}`;
+            const url = `https://wa.me/917994045703?text=${encodeURIComponent(text)}`;
+            window.open(url, '_blank');
+        }
+
+        function initVideoEmbeds() {
+            document.querySelectorAll('.youtube-container').forEach(container => {
+                const url = container.dataset.url;
+                let videoId = null;
+                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+                const match = url.match(regExp);
+                if (match && match[2].length === 11) {
+                    videoId = match[2];
+                    container.innerHTML = `<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="absolute inset-0 w-full h-full"></iframe>`;
+                } else {
+                    container.innerHTML = `<div class="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 border border-white/10"><span class="text-4xl mb-2 opacity-50">🔗</span><span class="text-[10px] text-gray-500 uppercase tracking-widest">External Link</span></div>`;
+                }
+            });
+        }
+        window.addEventListener('load', initVideoEmbeds);
+    </script>
+</body>
+</html>
