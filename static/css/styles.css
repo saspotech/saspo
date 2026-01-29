@@ -1,0 +1,122 @@
+/* --- 1. CORE SASPO STYLES --- */
+:root {
+    --saspo-dark: #00333d;
+    --saspo-main: #005f6b;
+    --saspo-light: #008c99;
+}
+body { font-family: 'Montserrat', sans-serif; background-color: #f8f9fa; }
+.bg-saspo { background-color: var(--saspo-dark); }
+.nav-logo { height: 40px; border-radius: 4px; }
+
+/* --- 2. RETRO ARCADE STYLES --- */
+.retro-universe {
+    background-color: #2b0e45; /* Deep Purple */
+    font-family: 'Press Start 2P', cursive; /* 8-bit Font */
+    color: #00ff00; /* Terminal Green */
+    min-height: 100vh;
+    border-top: 5px solid #ff00ff;
+    padding-bottom: 50px;
+}
+.retro-title {
+    font-size: 2rem;
+    color: #ff00ff;
+    text-shadow: 4px 4px #000;
+    margin-bottom: 10px;
+}
+.retro-subtitle { font-size: 0.7rem; animation: blink 1s infinite; }
+
+.retro-card {
+    border: 4px solid #00ff00;
+    background: #000;
+    padding: 10px;
+    transition: transform 0.2s;
+}
+.retro-card:hover {
+    transform: scale(1.05);
+    box-shadow: 8px 8px 0px #ff00ff;
+}
+.btn-retro {
+    background: #ff00ff;
+    color: white;
+    font-family: 'Press Start 2P', cursive;
+    border: none;
+    font-size: 0.6rem;
+    padding: 10px;
+    cursor: pointer;
+}
+.btn-retro:hover { background: #fff; color: #ff00ff; }
+
+/* Retro Animation: Pixel bounce */
+.pixel-mascot { animation: bounce 2s infinite; }
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* --- 3. FUTURISTIC AI STYLES --- */
+.ai-universe {
+    background-color: #050505;
+    font-family: 'Orbitron', sans-serif; /* Sci-Fi Font */
+    color: #00f3ff; /* Cyan */
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+    padding-bottom: 50px;
+}
+.ai-title {
+    font-size: 3rem;
+    letter-spacing: 5px;
+    text-shadow: 0 0 15px #00f3ff;
+}
+.ai-card {
+    background: rgba(0, 20, 40, 0.7);
+    border: 1px solid #00f3ff;
+    padding: 15px;
+    backdrop-filter: blur(4px);
+}
+
+/* AI Animation: Scanlines */
+.scanlines {
+    background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0),
+        rgba(255,255,255,0) 50%,
+        rgba(0,0,0,0.1) 50%,
+        rgba(0,0,0,0.1)
+    );
+    background-size: 100% 4px;
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* AI Animation: Pulse */
+.video-frame {
+    height: 150px;
+    background: #000;
+    border: 1px solid #333;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+.circle-pulse {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #00f3ff;
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(2.5); opacity: 0; }
+}
+.video-label {
+    font-size: 0.6rem;
+    margin-top: 10px;
+    color: #00f3ff;
+    font-family: monospace;
+}
