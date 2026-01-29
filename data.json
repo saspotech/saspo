@@ -277,15 +277,16 @@
             "description": "Future-proof your creative career. Learn to integrate Generative AI into your creative pipeline.",
             "modules": [
                 "Prompt Engineering",
-                "Stable Diffusion & ComfyUI",
-                "Training LoRAs",
+                "Video Stitching",
+                "Scripting",
                 "AI Video",
-                "Python Scripting"
+                "Gemini Nanobanana"
             ],
             "tools": [
-                "Midjourney",
-                "Stable Diffusion",
-                "Python",
+                "Whisk",
+                "Wan2.2",
+                "Flow",
+                "Gemini",
                 "ChatGPT"
             ]
         },
@@ -441,4 +442,5 @@
         "linkedin": "https://www.linkedin.com/company/saspoworld",
         "instagram": "https://www.instagram.com/saspoworld"
     }
+
 }
