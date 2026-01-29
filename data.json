@@ -47,29 +47,38 @@
         },
         "tots-adventure": {
             "title": "Tots Adventure",
-            "genre": "Kids",
+            "genre": "Kids / Educational",
             "img": "tots.png",
             "link": "#",
-            "description": "A magical journey designed for toddlers.",
+            "description": "A magical journey designed for toddlers to provide a safe and enjoyable interactive experience.",
             "features": [
-                "No Ads",
-                "Child-Safe",
-                "Parental Controls"
+                "Child-Appropriate Design",
+                "Safe Interactive Experience",
+                "Educational Content",
+                "Offline Compatible"
             ],
             "privacy_policy": {
                 "updated": "January 2026",
-                "intro": "This app is COPPA compliant and designed for toddlers.",
+                "intro": "Tots Adventure (“we”, “our”, or “us”) is designed to provide a safe and enjoyable interactive experience for young children. We are committed to protecting the privacy of children and complying with Google Play’s Families Policy.",
                 "sections": [
                     {
-                        "title": "Safety First",
-                        "content": "No ads, no tracking, no personal data collection."
+                        "title": "1. Information Collection",
+                        "content": "We do not require account creation and do not collect personal information like names, emails, or precise location data."
                     },
                     {
-                        "title": "Offline Play",
-                        "content": "The app works entirely offline."
+                        "title": "2. Advertising & Analytics",
+                        "content": "We use child-appropriate, contextual ads via Google AdMob. No interest-based tracking is performed. Limited non-personal data (device type, OS) may be used for app stability."
+                    },
+                    {
+                        "title": "3. Children's Privacy",
+                        "content": "Tots Adventure is intended for families. We do not knowingly collect personal data from children or allow users to share personal information."
+                    },
+                    {
+                        "title": "4. Data Security",
+                        "content": "We take reasonable steps to protect usage data. Since we do not collect personal data directly, security risks are minimized."
                     }
                 ],
-                "contact": "infosaspoworld@gmail.com"
+                "contact": "Developer: Saspo World Games | Email: infosaspoworld@gmail.com"
             }
         },
         "Pillar Jump": {
@@ -476,5 +485,6 @@
     }
 
 }
+
 
 
