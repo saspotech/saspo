@@ -72,6 +72,38 @@
                 "contact": "infosaspoworld@gmail.com"
             }
         },
+        "Pillar Jump": {
+            "title": "Pillar Jump",
+            "genre": "Educational Puzzle",
+            "img": "pillar.png",
+            "link": "#",
+            "description": "Pillar Jump is a fun and educational 3D game where players jump across moving pillars by choosing the correct answers. Solve number sequences, alphabets, addition and subtraction puzzles, and identify shapes and colors while navigating a colorful world.",
+            "features": [
+                "3D Platforming Gameplay",
+                "Math & Logic Puzzles",
+                "Shape & Color Recognition",
+                "Offline Mode"
+            ],
+            "privacy_policy": {
+                "updated": "January 2026",
+                "intro": "We respect your privacy. This policy explains how we handle your data in Pillar Jump.",
+                "sections": [
+                    {
+                        "title": "1. Data Collection",
+                        "content": "We DO NOT collect any personal information (PII). No account creation required."
+                    },
+                    {
+                        "title": "2. Ads & Internet",
+                        "content": "We use contextual ads only. Internet is required to load ads, but no tracking is performed."
+                    },
+                    {
+                        "title": "3. Local Storage",
+                        "content": "All game progress is saved locally on your device."
+                    }
+                ],
+                "contact": "infosaspoworld@gmail.com"
+            }
+        },
         "math-mania": {
             "title": "Math Mania",
             "genre": "Arcade",
@@ -444,3 +476,4 @@
     }
 
 }
+
