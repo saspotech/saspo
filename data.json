@@ -77,7 +77,7 @@
             "genre": "Educational Puzzle",
             "img": "pillar.png",
             "link": "#",
-            "description": "Pillar Jump is a fun and educational 3D game where players jump across moving pillars by choosing the correct answers. Solve number sequences, alphabets, addition and subtraction puzzles, and identify shapes and colors while navigating a colorful world.",
+            "description": "Pillar Jump is a fun and educational 3D game where players jump across moving pillars by choosing the correct answers. Solve number sequences, alphabets, addition and subtraction puzzles, and identify shapes and colors while navigating a colorful world. It is a landscape based game",
             "features": [
                 "3D Platforming Gameplay",
                 "Math & Logic Puzzles",
@@ -476,4 +476,5 @@
     }
 
 }
+
 
