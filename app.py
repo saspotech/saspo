@@ -1,7 +1,8 @@
 import os
 import json
 from functools import wraps
-from flask import Flask, render_template, Response, url_for, request, redirect, session, flash
+# UPDATED: Added 'send_from_directory' to imports
+from flask import Flask, render_template, Response, url_for, request, redirect, session, flash, send_from_directory
 from werkzeug.utils import secure_filename
 from fpdf import FPDF
 from datetime import datetime
@@ -93,6 +94,18 @@ def index():
                          ai_tools=data.get('ai_tools', []),
                          links=links,
                          seo=seo_data)
+
+# --- PWA ROUTES (UPDATED FOR ANDROID/IOS SUPPORT) ---
+@app.route('/manifest.json')
+def manifest():
+    return send_from_directory('static', 'manifest.json')
+
+@app.route('/sw.js')
+def service_worker():
+    response = send_from_directory('static', 'sw.js')
+    # Prevent caching of the service worker so updates happen immediately
+    response.headers['Cache-Control'] = 'no-cache'
+    return response
 
 # ================= ADMIN ROUTES =================
 
